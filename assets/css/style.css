@@ -1,5 +1,9 @@
+body {
+    background-image: url("../images/backgrounds-blank-blue-953214.jpg")
+}
+
 .header {
     text-align: center;
-    background-color: blue;
+    color: #f7d705;
 }
 
