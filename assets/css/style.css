@@ -7,3 +7,10 @@ body {
     color: #f7d705;
 }
 
+.add-button {
+    background-color: gold;
+}
+
+#topic {
+    width: 100%;
+}
