@@ -15,14 +15,13 @@ var topicsArray = [ "Simpsons",
 
 var buttonsDiv = $(".buttons");                    
 var addTopicButton;
+var queryStartString = "https://api.giphy.com/v1/gifs/search?q="
+var giphyAPIString = "&api_key=RI2S49StxgjZpK645XRwSnO3qL47UQSd?";
+var gifQueryString = "cats"
 
 makeButtons();
 addTopicButton = $("#add-topic");
 newTopicInput = $("#topic");
-
-var anyGifButton ;
-
-
 
 function makeButtons() {
     // make sure the div is empty before adding all of teh buttons
@@ -41,7 +40,6 @@ function makeButtons() {
         // append the new button to the appropriate div in the html page
         buttonsDiv.append(newButton);
     }
-    anyGifButton = $(".gif-button");
 };
 
     addTopicButton.click( function () {
@@ -52,11 +50,30 @@ function makeButtons() {
             makeButtons();
         };
     });
-        
     
     $(document).on("click", ".gif-button" , function() {
-        console.log(this.value); 
+        giphyCallAPI(this.value); 
     });
+
+
+    function giphyCallAPI (name) {
+        gifQueryString = name.replace(" ", "_");
+        gifQueryString = gifQueryString.replace(/\W/g, "");
+        gifQueryString = gifQueryString.replace("_", "+");
+        var queryURL = queryStartString + gifQueryString + giphyAPIString
+        console.log(queryURL);
+        // // $.ajax({
+        // //     url: queryURL,
+        // //     method: "GET"
+        // //   }).then(function(response) {
+        //     console.log(response);
+        //   });
+    }
+
+
+
+
+
 
 
 });
