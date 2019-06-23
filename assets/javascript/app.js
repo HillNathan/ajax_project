@@ -13,17 +13,23 @@ var topicsArray = [ "Simpsons",
                     "Loony Toons",
                     "Office"];
 
-var favoritesArray = [];                    
+var favoritesArray = JSON.parse(localStorage.getItem("gif-favorites"));
+console.log("loading in array")
+console.log(favoritesArray)
+if (!Array.isArray(favoritesArray)) {
+    favoritesArray = [];
+}
 
 var buttonsDiv = $(".buttons");                    
 var addTopicButton;
-var queryStartString = "https://api.giphy.com/v1/gifs/search?q=";
-var giphyAPIString = "&api_key=RI2S49StxgjZpK645XRwSnO3qL47UQSd&limit=10&rating=g";
+var queryStartString = "https://cors-anywhere.herokuapp.com/https://api.giphy.com/v1/gifs/";
+var giphyAPIString = "&api_key=RI2S49StxgjZpK645XRwSnO3qL47UQSd";
+var giphyFilters = "&limit=10&rating=g"
 var gifQueryString;
 var gifsDiv = $(".gif-div");
 
 makeButtons();
-drawFavs ();
+drawFavs();
 
 addTopicButton = $("#add-topic");
 newTopicInput = $("#topic");
@@ -47,44 +53,36 @@ function makeButtons() {
     }
 };
 
-    addTopicButton.click( function () {
-        event.preventDefault();
-        var newTopic = newTopicInput.val();
-        if (newTopic !== ""){
-            newTopicInput.val("");
-            topicsArray.push(newTopic);
-            makeButtons();
-        };
-    });
+addTopicButton.click( function () {
+    event.preventDefault();
+    var newTopic = newTopicInput.val();
+    if (newTopic !== ""){
+        newTopicInput.val("");
+        topicsArray.push(newTopic);
+        makeButtons();
+    };
+});
     
-    $(document).on("click", ".gif-button" , function() {
-        giphyCallAPI(this.value); 
-    });
+$(document).on("click", ".gif-button" , function() {
+    giphyCallAPI(this.value); 
+});
 
 
-    function giphyCallAPI (name) {
-        gifQueryString = name.replace(" ", "_");
-        gifQueryString = gifQueryString.replace(/\W/g, "");
-        gifQueryString = gifQueryString.replace("_", "+");
-        var queryURL = queryStartString + gifQueryString + giphyAPIString
-        // console.log(queryURL);
-        $.ajax({
-            url: queryURL,
-            method: "GET"
-          }).then(function(response) {
-            console.log(response);
-            drawGifs(response);
-          });
-    }
-function drawFavs (){
-    $("#my-favorites").empty();
-    
-    for (var i=0; i<favoritesArray.length; i++){
-        var newFav = $("<li>");
-        newFav.text(favoritesArray[i].title)
-        $("#my-favorites").append(newFav);
-    }
+function giphyCallAPI (name) {
+    gifQueryString = name.replace(" ", "_");
+    gifQueryString = gifQueryString.replace(/\W/g, "");
+    gifQueryString = gifQueryString.replace("_", "+");
+    var queryURL = queryStartString + "search?q=" + gifQueryString + giphyAPIString + giphyFilters;
+    console.log(queryURL);
+    $.ajax({
+        url: queryURL,
+        method: "GET",
+        }).then(function(response) {
+        console.log(response);
+        drawGifs(response);
+        });
 }
+
 
 function drawGifs (APIresponse) {
     // This is a function to take the API response and draw the GIFs into the appropriate location on the page
@@ -104,7 +102,11 @@ function drawGifs (APIresponse) {
         newCardBody.addClass("card-body p-1");
         newCardBody.html("Rated: " + APIresponse.data[i].rating.toUpperCase())
         var newFavBtn = $("<button>");
-        newFavBtn.addClass("btn btn-light favorite-no");
+        if (alreadyFav(APIresponse.data[i].title)){
+            newFavBtn.addClass("btn btn-light p-1 favorite-yes");
+        } else {
+            newFavBtn.addClass("btn btn-light p-1 favorite-no");
+        }
         newFavBtn.html("&hearts;");
         newFavBtn.attr("value", APIresponse.data[i].id);
         newFavBtn.attr("title", APIresponse.data[i].title);
@@ -122,25 +124,51 @@ $(document).on("click", ".giphy-img" , function() {
     $(this).attr("data", temp)
 });
 
+
+// Leaving this code in here, but I never could get the Favorites thing to work, mostly because I kept running into different 
+//  API issues that I could not resolve. Between CORS and 401-Unauthorized responses that I could not figure our for the life
+//  of me it was getting to be too much to get done by the end date of the class, so I scrapped the functionality, since it 
+//  was a bonus goal anyway. 
+// $(document).on("click", ".favorite-list" , function() {
+//     var queryID = $(this).attr("data-id");
+//     //http://api.giphy.com/v1/gifs?api_key=dc6zaTOxFJmzC&ids=feqkVgjJpYtjy
+//     var queryURL = queryStartString + queryID + giphyAPIString;
+//     // var queryURL = "http://api.giphy.com/v1/gifs?api_key=dc6zaTOxFJmzC&ids=feqkVgjJpYtjy"
+//     console.log(queryID);
+//     console.log(queryURL);
+//     $.ajax({
+//         url: queryURL,
+//         method: "GET"
+//       }).then(function(response) {
+//         // console.log(response);
+
+//         drawGifs(response);
+//       });
+// });
+
 $(document).on("click", ".favorite-no" , function() {
     if (!alreadyFav($(this).attr("title"))){
-        var newObj = {} ;
-        newObj.title = $(this).attr("title");
-        newObj.id = $(this).attr("value");
-        favoritesArray.push(newObj);
+        $(this).attr("class", "btn btn-light p-1 favorite-yes");
+        favoritesArray.push($(this).attr("title"));
+        localStorage.setItem("gif-favorites", JSON.stringify(favoritesArray))
     }
     drawFavs();
 });
 
 function alreadyFav(name) {
-    for(var i=0; i<favoritesArray.length; i++){
-        if(favoritesArray[i].title === name) {
-            return true;  
-        }
-    }
-    return false;
+    return favoritesArray.includes(name);
 }
 
+function drawFavs (){
+    console.log(favoritesArray);
+    $("#my-favorites").empty();
+    
+    for (var i=0; i<favoritesArray.length; i++){
+        var newFav = $("<li>");
+        newFav.html("<div class='favorite-list'>" + favoritesArray[i] + "</div>");
+        $("#my-favorites").append(newFav);
+    }
+}
 
 
 });

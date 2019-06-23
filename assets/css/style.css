@@ -30,11 +30,17 @@ h4 {
 }
 
 .favorite-no {
+    font-size:18pt;
     float:right;
 }
 
 .favorite-yes {
     float:right;
+    font-size:18pt;
+    color:red;
+}
+
+.favorite-yes:hover {
     color:red;
 }
 
@@ -45,3 +51,7 @@ h4 {
 .favorites {
     color: #f7d705;
 }
+
+.favorite-list { 
+    color: orange;
+}   
